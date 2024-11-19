@@ -1,2 +1,2 @@
-# devops-platform
+# Platform Engineering
 Internal Developer Platform - DevEx
