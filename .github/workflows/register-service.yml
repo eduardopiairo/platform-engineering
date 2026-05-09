@@ -1,0 +1,80 @@
+name: Register Existing Service
+
+on:
+  workflow_dispatch:
+    inputs:
+      service_name:
+        required: true
+        description: Unique identifier for the service (lowercase, hyphens allowed)
+        type: string
+      description:
+        required: false
+        description: What does this service do?
+        type: string
+      github_org:
+        required: true
+        description: GitHub organization that owns the repository
+        type: string
+      repo_name:
+        required: true
+        description: Name of the existing GitHub repository
+        type: string
+      language:
+        required: true
+        description: "Primary language: python, typescript, go, java, rust, other"
+        type: string
+      tier:
+        required: true
+        description: "tier-1 (critical), tier-2 (important), tier-3 (low impact)"
+        type: string
+        default: tier-3
+      lifecycle:
+        required: true
+        description: "production, experimental, or deprecated"
+        type: string
+        default: production
+      owner:
+        required: true
+        description: Team or user responsible for this service
+        type: string
+
+jobs:
+  register:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout target repository
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ inputs.github_org }}/${{ inputs.repo_name }}
+          token: ${{ secrets.GH_TOKEN }}
+
+      - name: Render catalog-info.yaml
+        run: |
+          cat <<EOF > catalog-info.yaml
+          apiVersion: backstage.io/v1alpha1
+          kind: Component
+          metadata:
+            name: ${{ inputs.service_name }}
+            description: ${{ inputs.description }}
+            annotations:
+              github.com/project-slug: ${{ inputs.github_org }}/${{ inputs.repo_name }}
+            tags:
+              - ${{ inputs.language }}
+              - ${{ inputs.tier }}
+          spec:
+            type: service
+            lifecycle: ${{ inputs.lifecycle }}
+            owner: ${{ inputs.owner }}
+          EOF
+
+      - name: Open pull request with catalog-info.yaml
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GH_TOKEN }}
+          commit-message: "chore: add Backstage catalog-info.yaml"
+          branch: add-backstage-catalog-info
+          title: "chore: add Backstage catalog-info.yaml"
+          body: |
+            Adds `catalog-info.yaml` to register **${{ inputs.service_name }}** in the Backstage catalog.
+
+            Triggered via the Register Existing Service workflow.

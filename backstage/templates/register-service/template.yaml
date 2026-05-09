@@ -1,0 +1,131 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: register-existing-service
+  title: Register Existing Service
+  description: Register an existing service into the Backstage catalog
+  tags:
+    - catalog
+    - register
+spec:
+  owner: platform-team
+  type: service
+
+  parameters:
+    - title: Service Details
+      required:
+        - service_name
+        - repo_name
+        - language
+        - tier
+        - owner
+      properties:
+        service_name:
+          title: Service Name
+          type: string
+          description: Unique identifier for the service (lowercase, hyphens allowed)
+          pattern: "^[a-z0-9-]+$"
+          ui:autofocus: true
+        description:
+          title: Description
+          type: string
+          description: What does this service do?
+        github_org:
+          title: GitHub Organization
+          type: string
+          description: GitHub organization or user that owns the repository
+        repo_name:
+          title: Repository Name
+          type: string
+          description: Name of the existing GitHub repository
+        language:
+          title: Language
+          type: string
+          enum:
+            - python
+            - typescript
+            - go
+            - java
+            - rust
+            - other
+          enumNames:
+            - Python
+            - TypeScript
+            - Go
+            - Java
+            - Rust
+            - Other
+        tier:
+          title: Tier
+          type: string
+          description: "Tier 1 = critical, Tier 2 = important, Tier 3 = low impact"
+          enum:
+            - tier-1
+            - tier-2
+            - tier-3
+          enumNames:
+            - "Tier 1 (Critical)"
+            - "Tier 2 (Important)"
+            - "Tier 3 (Low impact)"
+          default: tier-3
+        lifecycle:
+          title: Lifecycle
+          type: string
+          enum:
+            - production
+            - experimental
+            - deprecated
+          default: production
+        owner:
+          title: Owner
+          type: string
+          description: Team or user responsible for this service
+          ui:field: OwnerPicker
+          ui:options:
+            catalogFilter:
+              kind: Group
+
+  steps:
+    - id: fetch-template
+      name: Generate catalog-info.yaml
+      action: fetch:template
+      input:
+        url: ./skeleton
+        values:
+          service_name: ${{ parameters.service_name }}
+          description: ${{ parameters.description }}
+          github_org: ${{ parameters.github_org }}
+          repo_name: ${{ parameters.repo_name }}
+          language: ${{ parameters.language }}
+          tier: ${{ parameters.tier }}
+          lifecycle: ${{ parameters.lifecycle }}
+          owner: ${{ parameters.owner }}
+
+    - id: open-pr
+      name: Open Pull Request
+      action: publish:github:pull-request
+      input:
+        repoUrl: github.com?owner=${{ parameters.github_org }}&repo=${{ parameters.repo_name }}
+        branchName: add-backstage-catalog-info
+        title: "chore: add Backstage catalog-info.yaml"
+        description: |
+          Adds `catalog-info.yaml` to register this service in the Backstage catalog.
+
+          Triggered via the **Register Existing Service** template.
+        targetPath: .
+
+    - id: register
+      name: Register in Catalog
+      action: catalog:register
+      input:
+        repoContentsUrl: ${{ steps['open-pr'].output.remoteUrl }}
+        catalogInfoPath: /catalog-info.yaml
+        optional: true
+
+  output:
+    links:
+      - title: Pull Request
+        url: ${{ steps['open-pr'].output.remoteUrl }}
+      - title: Open in Catalog
+        icon: catalog
+        entityRef: ${{ steps['register'].output.entityRef }}
