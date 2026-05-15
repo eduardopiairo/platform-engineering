@@ -77,7 +77,7 @@
   },
   "invocationMethod": {
     "type": "GITHUB",
-    "org": "<YOUR_GITHUB_ORG>",
+    "org": "eduardopiairo",
     "repo": "platform-engineering",
     "workflow": "port-register-service.yml",
     "workflowInputs": {

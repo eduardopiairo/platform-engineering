@@ -72,10 +72,7 @@ jobs:
               "language": "${{ inputs.language }}",
               "tier": "${{ inputs.tier }}",
               "lifecycle": "${{ inputs.lifecycle }}",
-              "repo": "https://github.com/${{ inputs.github_org }}/${{ inputs.repo_name }}"
-            }
-          relations: |-
-            {
+              "repo": "https://github.com/${{ inputs.github_org }}/${{ inputs.repo_name }}",
               "owner": "${{ inputs.owner }}"
             }
 
