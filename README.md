@@ -3,7 +3,7 @@ Internal Developer Platform
 
 ## Architecture
 
-This platform follows the five-plane reference architecture defined by the [Platform Engineering community](https://platformengineering.org/blog/create-your-own-platform-engineering-reference-architectures) (based on hundreds of real-world IDP implementations) and the capability model from the [CNCF Platforms Whitepaper](https://tag-app-delivery.cncf.io/whitepapers/platforms/).
+This platform follows the five-plane reference architecture defined by the [Platform Engineering community](https://platformengineering.org/blog/create-your-own-platform-engineering-reference-architectures) and the capability model from the [CNCF Platforms Whitepaper](https://tag-app-delivery.cncf.io/whitepapers/platforms/).
 
 ```
 ┌──────────────────────────────────────────────────────────────────────────────┐
@@ -12,15 +12,22 @@ This platform follows the five-plane reference architecture defined by the [Plat
 │  ┌────────────────────────────────────────────────────────────────────────┐  │
 │  │                     1. Developer Control Plane                          │  │
 │  │                                                                        │  │
-│  │   Backstage Developer Portal                                           │  │
-│  │   Service Catalog · Software Templates · TechDocs · Scorecards        │  │
+│  │   ┌──────────────────────────┐  ┌──────────────────────────────────┐  │  │
+│  │   │  Path 1 · Port           │  │  Path 2 · Backstage               │  │  │
+│  │   │  (managed SaaS portal)   │  │  (self-hosted OSS portal)         │  │  │
+│  │   │                          │  │                                  │  │  │
+│  │   │  Software Catalog        │  │  Software Catalog                │  │  │
+│  │   │  Self-service Actions    │  │  Software Templates              │  │  │
+│  │   │  Scorecards              │  │  TechDocs                        │  │  │
+│  │   │  Automations             │  │  Scorecards (plugins)            │  │  │
+│  │   └──────────────────────────┘  └──────────────────────────────────┘  │  │
 │  └──────────────────────────────────┬─────────────────────────────────────┘  │
 │                                     │                                        │
 │  ┌──────────────────────────────────▼─────────────────────────────────────┐  │
 │  │                   2. Integration & Delivery Plane                       │  │
 │  │                                                                        │  │
-│  │   GitHub Actions (CI)              ArgoCD (CD / GitOps)               │  │
-│  │   build · test · push image        sync · deploy · rollback           │  │
+│  │   GitHub Actions (CI)                  ArgoCD (CD / GitOps)           │  │
+│  │   build · test · push image            sync · deploy · rollback       │  │
 │  └────────────────┬─────────────────────────────────┬───────────────────┘  │
 │                   │                                 │                        │
 │  ┌────────────────▼─────────────────────────────────▼───────────────────┐  │
@@ -41,20 +48,46 @@ This platform follows the five-plane reference architecture defined by the [Plat
 
 ## The Five Planes
 
-Sourced from the [Platform Engineering community reference architecture](https://platformengineering.org/blog/create-your-own-platform-engineering-reference-architectures), modelled on McKinsey's framework and expanded with community tooling patterns.
-
 ### 1. Developer Control Plane
-The primary interaction layer — where platform users configure, discover, and consume platform capabilities without needing to understand the underlying infrastructure.
 
-| Capability | Tool | Status |
+The primary interaction layer where platform users configure, discover, and consume platform capabilities. This platform explores **two portal options in parallel**:
+
+#### Path 1 — Port (managed SaaS)
+
+[Port](https://www.port.io) is a fully managed developer portal with a flexible data model built on blueprints and relations. Teams define their own entity types and self-service actions without managing infrastructure.
+
+| Capability | Port Feature | Notes |
 |---|---|---|
-| Developer Portal | [Backstage](https://backstage.io) | Planned |
-| Service Catalog | Backstage Catalog | Planned |
-| Software Templates | Backstage Scaffolder | In progress |
-| TechDocs | Backstage TechDocs | Planned |
+| Software Catalog | Blueprints + Entities | Schema-driven, fully customizable |
+| Self-service | Actions (GitHub / webhook) | Triggers CI workflows, runbooks |
+| Scorecards | Built-in | Service quality and compliance gates |
+| Automations | Automation rules | Event-driven, no-code workflows |
+
+#### Path 2 — Backstage (self-hosted OSS)
+
+[Backstage](https://backstage.io) is an open-source developer portal from Spotify, self-hosted and fully extensible via plugins.
+
+| Capability | Backstage Feature | Notes |
+|---|---|---|
+| Software Catalog | Catalog + `catalog-info.yaml` | Git-backed entity registration |
+| Golden Path Templates | Scaffolder | Cookiecutter-style project generation |
+| Documentation | TechDocs | Docs-as-code, MkDocs-powered |
+| Plugins | Plugin marketplace | Kubernetes, ArgoCD, cost, etc. |
+
+#### Path Comparison
+
+| Dimension | Path 1 · Port | Path 2 · Backstage |
+|---|---|---|
+| Hosting | SaaS (managed) | Self-hosted |
+| Setup time | Minutes | Days to weeks |
+| Customization | Blueprint-driven (no-code/low-code) | Plugin-driven (React/TypeScript) |
+| Maintenance | Vendor-managed | Platform team owns |
+| Cost | Paid subscription | Open source (infra cost only) |
+| Best for | Fast time-to-value, smaller platform teams | Full control, large engineering orgs |
 
 ### 2. Integration & Delivery Plane
-Handles the full lifecycle of building artifacts and deploying them: CI pipelines produce container images, GitOps tooling reconciles the desired state into the cluster.
+
+Handles the full lifecycle of building artifacts and deploying them.
 
 | Capability | Tool | Status |
 |---|---|---|
@@ -63,7 +96,8 @@ Handles the full lifecycle of building artifacts and deploying them: CI pipeline
 | GitOps CD | ArgoCD | Planned |
 
 ### 3. Resource Plane
-The actual infrastructure — compute, networking, storage, and cloud resources that workloads run on. Provisioned declaratively via GitOps.
+
+Actual infrastructure — compute, networking, storage, and cloud resources. Provisioned declaratively via GitOps.
 
 | Capability | Tool | Status |
 |---|---|---|
@@ -71,7 +105,8 @@ The actual infrastructure — compute, networking, storage, and cloud resources 
 | Cloud Resource Provisioning | Crossplane | Planned |
 
 ### 4. Monitoring & Logging Plane
-Cross-cutting observability across applications and infrastructure: real-time metrics, structured logs, distributed traces, and alerting.
+
+Cross-cutting observability across applications and infrastructure.
 
 | Capability | Tool | Status |
 |---|---|---|
@@ -81,7 +116,8 @@ Cross-cutting observability across applications and infrastructure: real-time me
 | Alerting | TBD | Not started |
 
 ### 5. Security Plane
-Manages secrets, identity, and policy enforcement to protect sensitive information across all other planes.
+
+Manages secrets, identity, and policy enforcement across all planes.
 
 | Capability | Tool | Status |
 |---|---|---|
@@ -89,28 +125,14 @@ Manages secrets, identity, and policy enforcement to protect sensitive informati
 | Identity & Access | TBD | Not started |
 | Policy Enforcement | TBD | Not started |
 
-## CNCF Capability Coverage
-
-The [CNCF Platforms Whitepaper](https://tag-app-delivery.cncf.io/whitepapers/platforms/) defines the following capability domains for an IDP. Coverage status against this platform:
-
-| CNCF Capability | Plane | Tool | Status |
-|---|---|---|---|
-| Web Portals | Developer Control | Backstage | Planned |
-| Golden Path Templates | Developer Control | Backstage Scaffolder | In progress |
-| Build & Test Automation | Integration & Delivery | GitHub Actions | In progress |
-| Delivery Automation | Integration & Delivery | ArgoCD | Planned |
-| Artifact Storage | Integration & Delivery | GitHub Container Registry | Planned |
-| Infrastructure Services | Resource | Kubernetes | Planned |
-| Data Services | Resource | Crossplane | Planned |
-| Observability | Monitoring & Logging | TBD | Not started |
-| Identity & Secrets | Security | TBD | Not started |
-| Security Services | Security | TBD | Not started |
-
 ## Repository Structure
 
 ```
 platform-engineering/
-└── backstage/
+├── path1-port/                      # Path 1: Port as developer portal
+│   └── ...                          # Port blueprints, actions, automations
+│
+└── path2-backstage/                 # Path 2: Backstage as developer portal
     └── templates/
         └── register-service/        # Register Existing Service template
             ├── template.yaml        # Backstage Software Template
@@ -118,11 +140,14 @@ platform-engineering/
                 └── catalog-info.yaml
 ```
 
+> The current `backstage/` directory maps to Path 2 and will be renamed to `path2-backstage/`.
+
 ## References
 
 - [Platform Engineering community — IDP Reference Architecture](https://platformengineering.org/blog/create-your-own-platform-engineering-reference-architectures)
 - [CNCF TAG App Delivery — Platforms Whitepaper](https://tag-app-delivery.cncf.io/whitepapers/platforms/)
 - [CNCF Platform Engineering Maturity Model](https://tag-app-delivery.cncf.io/whitepapers/platform-eng-maturity-model/)
-- [Backstage](https://backstage.io)
+- [Port — Developer Portal](https://www.port.io)
+- [Backstage — Open Source Developer Portal](https://backstage.io)
 - [ArgoCD](https://argoproj.github.io/cd/)
 - [Crossplane](https://www.crossplane.io)
