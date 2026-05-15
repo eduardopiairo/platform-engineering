@@ -1,0 +1,106 @@
+name: Port - Register Existing Service
+
+on:
+  workflow_dispatch:
+    inputs:
+      service_name:
+        required: true
+        type: string
+        description: Unique identifier for the service
+      description:
+        required: false
+        type: string
+        description: What does this service do?
+      github_org:
+        required: true
+        type: string
+        description: GitHub organization that owns the repository
+      repo_name:
+        required: true
+        type: string
+        description: Name of the existing GitHub repository
+      language:
+        required: true
+        type: string
+        description: "Primary language: python, typescript, go, java, rust, other"
+      tier:
+        required: true
+        type: string
+        default: tier-3
+        description: "tier-1 (critical), tier-2 (important), tier-3 (low impact)"
+      lifecycle:
+        required: true
+        type: string
+        default: production
+        description: "production, experimental, or deprecated"
+      owner:
+        required: true
+        type: string
+        description: Team responsible for this service
+      port_context:
+        required: true
+        type: string
+        description: Port action context (runId, blueprint, entity)
+
+jobs:
+  register:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Inform Port — starting
+        uses: port-labs/port-github-action@v1
+        with:
+          clientId: ${{ secrets.PORT_CLIENT_ID }}
+          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          baseUrl: https://api.getport.io
+          operation: PATCH_RUN
+          runId: ${{ fromJson(inputs.port_context).runId }}
+          logMessage: Registering service "${{ inputs.service_name }}" from ${{ inputs.github_org }}/${{ inputs.repo_name }}...
+
+      - name: Upsert service entity in Port
+        uses: port-labs/port-github-action@v1
+        with:
+          clientId: ${{ secrets.PORT_CLIENT_ID }}
+          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          baseUrl: https://api.getport.io
+          operation: UPSERT
+          identifier: ${{ inputs.service_name }}
+          blueprint: service
+          title: ${{ inputs.service_name }}
+          properties: |-
+            {
+              "description": "${{ inputs.description }}",
+              "language": "${{ inputs.language }}",
+              "tier": "${{ inputs.tier }}",
+              "lifecycle": "${{ inputs.lifecycle }}",
+              "repo": "https://github.com/${{ inputs.github_org }}/${{ inputs.repo_name }}"
+            }
+          relations: |-
+            {
+              "owner": "${{ inputs.owner }}"
+            }
+
+      - name: Inform Port — success
+        if: success()
+        uses: port-labs/port-github-action@v1
+        with:
+          clientId: ${{ secrets.PORT_CLIENT_ID }}
+          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          baseUrl: https://api.getport.io
+          operation: PATCH_RUN
+          runId: ${{ fromJson(inputs.port_context).runId }}
+          status: SUCCESS
+          summary: Service "${{ inputs.service_name }}" registered in Port.
+          logMessage: Entity created. Repository linked to https://github.com/${{ inputs.github_org }}/${{ inputs.repo_name }}.
+
+      - name: Inform Port — failure
+        if: failure()
+        uses: port-labs/port-github-action@v1
+        with:
+          clientId: ${{ secrets.PORT_CLIENT_ID }}
+          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          baseUrl: https://api.getport.io
+          operation: PATCH_RUN
+          runId: ${{ fromJson(inputs.port_context).runId }}
+          status: FAILURE
+          summary: Failed to register service "${{ inputs.service_name }}".
+          logMessage: Check the workflow run logs for details.

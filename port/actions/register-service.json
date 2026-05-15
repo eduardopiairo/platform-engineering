@@ -1,0 +1,96 @@
+{
+  "identifier": "register_existing_service",
+  "title": "Register Existing Service",
+  "icon": "Microservice",
+  "description": "Register an existing service into the Port catalog by providing its repository details.",
+  "trigger": {
+    "type": "self-service",
+    "operation": "CREATE",
+    "blueprintIdentifier": "service",
+    "userInputs": {
+      "properties": {
+        "service_name": {
+          "title": "Service Name",
+          "type": "string",
+          "description": "Unique identifier for the service (lowercase, hyphens allowed)",
+          "pattern": "^[a-z0-9-]+$"
+        },
+        "description": {
+          "title": "Description",
+          "type": "string",
+          "description": "What does this service do?"
+        },
+        "github_org": {
+          "title": "GitHub Organization",
+          "type": "string",
+          "description": "GitHub organization or user that owns the repository"
+        },
+        "repo_name": {
+          "title": "Repository Name",
+          "type": "string",
+          "description": "Name of the existing GitHub repository"
+        },
+        "language": {
+          "title": "Language",
+          "type": "string",
+          "enum": ["python", "typescript", "go", "java", "rust", "other"],
+          "enumColors": {
+            "python": "blue",
+            "typescript": "blue",
+            "go": "turquoise",
+            "java": "orange",
+            "rust": "red",
+            "other": "lightGray"
+          }
+        },
+        "tier": {
+          "title": "Tier",
+          "type": "string",
+          "description": "tier-1 = critical, tier-2 = important, tier-3 = low impact",
+          "enum": ["tier-1", "tier-2", "tier-3"],
+          "enumColors": {
+            "tier-1": "red",
+            "tier-2": "orange",
+            "tier-3": "green"
+          },
+          "default": "tier-3"
+        },
+        "lifecycle": {
+          "title": "Lifecycle",
+          "type": "string",
+          "enum": ["production", "experimental", "deprecated"],
+          "enumColors": {
+            "production": "green",
+            "experimental": "yellow",
+            "deprecated": "lightGray"
+          },
+          "default": "production"
+        },
+        "owner": {
+          "title": "Owner",
+          "type": "string",
+          "description": "Team responsible for this service (e.g. platform-team)"
+        }
+      },
+      "required": ["service_name", "repo_name", "github_org", "language", "tier", "owner"]
+    }
+  },
+  "invocationMethod": {
+    "type": "GITHUB",
+    "org": "<YOUR_GITHUB_ORG>",
+    "repo": "platform-engineering",
+    "workflow": "port-register-service.yml",
+    "workflowInputs": {
+      "service_name": "{{ .inputs.service_name }}",
+      "description": "{{ .inputs.description }}",
+      "github_org": "{{ .inputs.github_org }}",
+      "repo_name": "{{ .inputs.repo_name }}",
+      "language": "{{ .inputs.language }}",
+      "tier": "{{ .inputs.tier }}",
+      "lifecycle": "{{ .inputs.lifecycle }}",
+      "owner": "{{ .inputs.owner }}",
+      "port_context": "{{ . | toJson }}"
+    },
+    "reportWorkflowStatus": true
+  }
+}
