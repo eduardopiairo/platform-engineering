@@ -6,7 +6,6 @@
   "trigger": {
     "type": "self-service",
     "operation": "CREATE",
-    "blueprintIdentifier": "service",
     "userInputs": {
       "properties": {
         "service_name": {
@@ -33,7 +32,14 @@
         "language": {
           "title": "Language",
           "type": "string",
-          "enum": ["python", "typescript", "go", "java", "rust", "other"],
+          "enum": [
+            "python",
+            "typescript",
+            "go",
+            "java",
+            "rust",
+            "other"
+          ],
           "enumColors": {
             "python": "blue",
             "typescript": "blue",
@@ -47,7 +53,11 @@
           "title": "Tier",
           "type": "string",
           "description": "tier-1 = critical, tier-2 = important, tier-3 = low impact",
-          "enum": ["tier-1", "tier-2", "tier-3"],
+          "enum": [
+            "tier-1",
+            "tier-2",
+            "tier-3"
+          ],
           "enumColors": {
             "tier-1": "red",
             "tier-2": "orange",
@@ -58,7 +68,11 @@
         "lifecycle": {
           "title": "Lifecycle",
           "type": "string",
-          "enum": ["production", "experimental", "deprecated"],
+          "enum": [
+            "production",
+            "experimental",
+            "deprecated"
+          ],
           "enumColors": {
             "production": "green",
             "experimental": "yellow",
@@ -72,25 +86,35 @@
           "description": "Team responsible for this service (e.g. platform-team)"
         }
       },
-      "required": ["service_name", "repo_name", "github_org", "language", "tier", "owner"]
-    }
+      "required": [
+        "service_name",
+        "repo_name",
+        "github_org",
+        "language",
+        "tier",
+        "owner"
+      ]
+    },
+    "blueprintIdentifier": "service"
   },
   "invocationMethod": {
-    "type": "GITHUB",
-    "org": "eduardopiairo",
-    "repo": "platform-engineering",
-    "workflow": "port-register-service.yml",
-    "workflowInputs": {
-      "service_name": "{{ .inputs.service_name }}",
-      "description": "{{ .inputs.description }}",
-      "github_org": "{{ .inputs.github_org }}",
-      "repo_name": "{{ .inputs.repo_name }}",
-      "language": "{{ .inputs.language }}",
-      "tier": "{{ .inputs.tier }}",
-      "lifecycle": "{{ .inputs.lifecycle }}",
-      "owner": "{{ .inputs.owner }}",
-      "port_context": "{{ . | toJson }}"
-    },
-    "reportWorkflowStatus": true
-  }
+    "type": "INTEGRATION_ACTION",
+    "installationId": "github-ocean",
+    "integrationActionType": "dispatch_workflow",
+    "integrationActionExecutionProperties": {
+      "org": "eduardopiairo",
+      "repo": "platform-engineering",
+      "workflow": "port-register-service.yml",
+      "workflowInputs": {
+        "{{ spreadValue() }}": "{{ .inputs }}",
+        "port_context": {
+          "runId": "{{ .run.id }}",
+          "blueprint": "{{ .action.blueprint }}"
+        }
+      },
+      "reportWorkflowStatus": true
+    }
+  },
+  "allowAnyoneToViewRuns": true,
+  "requiredApproval": false
 }
