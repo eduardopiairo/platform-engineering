@@ -14,11 +14,6 @@
           "description": "Unique identifier for the service (lowercase, hyphens allowed)",
           "pattern": "^[a-z0-9-]+$"
         },
-        "description": {
-          "title": "Description",
-          "type": "string",
-          "description": "What does this service do?"
-        },
         "github_org": {
           "title": "GitHub Organization",
           "type": "string",
@@ -32,6 +27,7 @@
         "language": {
           "title": "Language",
           "type": "string",
+          "icon": "Git",
           "enum": [
             "python",
             "typescript",
@@ -52,38 +48,27 @@
         "tier": {
           "title": "Tier",
           "type": "string",
-          "description": "tier-1 = critical, tier-2 = important, tier-3 = low impact",
+          "description": "How mission-critical the service is",
           "enum": [
-            "tier-1",
-            "tier-2",
-            "tier-3"
+            "Mission Critical",
+            "Customer Facing",
+            "Internal Service",
+            "Other"
           ],
           "enumColors": {
-            "tier-1": "red",
-            "tier-2": "orange",
-            "tier-3": "green"
+            "Mission Critical": "turquoise",
+            "Customer Facing": "green",
+            "Internal Service": "darkGray",
+            "Other": "yellow"
           },
-          "default": "tier-3"
+          "default": "Internal Service"
         },
-        "lifecycle": {
-          "title": "Lifecycle",
+        "slack": {
+          "title": "Slack Channel",
           "type": "string",
-          "enum": [
-            "production",
-            "experimental",
-            "deprecated"
-          ],
-          "enumColors": {
-            "production": "green",
-            "experimental": "yellow",
-            "deprecated": "lightGray"
-          },
-          "default": "production"
-        },
-        "owner": {
-          "title": "Owner",
-          "type": "string",
-          "description": "Team responsible for this service (e.g. platform-team)"
+          "icon": "Slack",
+          "description": "Slack channel URL for this service",
+          "format": "url"
         }
       },
       "required": [
@@ -91,8 +76,7 @@
         "repo_name",
         "github_org",
         "language",
-        "tier",
-        "owner"
+        "tier"
       ]
     },
     "blueprintIdentifier": "service"
