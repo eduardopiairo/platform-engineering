@@ -40,7 +40,7 @@ on:
       port_context:
         required: true
         type: string
-        description: Port action context (runId, blueprint, entity)
+        description: "Port action context JSON: {runId, blueprint}"
 
 jobs:
   register:
