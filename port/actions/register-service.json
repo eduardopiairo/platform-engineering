@@ -62,13 +62,6 @@
             "Other": "yellow"
           },
           "default": "Internal Service"
-        },
-        "slack": {
-          "title": "Slack Channel",
-          "type": "string",
-          "icon": "Slack",
-          "description": "Slack channel URL for this service",
-          "format": "url"
         }
       },
       "required": [

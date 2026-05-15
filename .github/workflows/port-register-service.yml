@@ -24,10 +24,6 @@ on:
         type: string
         default: Internal Service
         description: "Mission Critical, Customer Facing, Internal Service, Other"
-      slack:
-        required: false
-        type: string
-        description: Slack channel URL for this service
       port_context:
         required: true
         type: string
@@ -61,8 +57,7 @@ jobs:
             {
               "language": "${{ inputs.language }}",
               "tier": "${{ inputs.tier }}",
-              "url": "https://github.com/${{ inputs.github_org }}/${{ inputs.repo_name }}",
-              "slack": "${{ inputs.slack }}"
+              "url": "https://github.com/${{ inputs.github_org }}/${{ inputs.repo_name }}"
             }
           relations: "{}"
 
