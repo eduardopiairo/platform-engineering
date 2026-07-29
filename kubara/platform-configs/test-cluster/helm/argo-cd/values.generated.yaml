@@ -33,11 +33,11 @@ bootstrapValues:
       platformComponents:
         repoURL: "https://github.com/eduardopiairo/platform-engineering.git"
         path: "platform-components/helm"
-        targetRevision: "main"
+        targetRevision: "feature/kubara"
       platformConfigs:
         repoURL: "https://github.com/eduardopiairo/platform-engineering.git"
         path: "platform-configs"
-        targetRevision: "main"
+        targetRevision: "feature/kubara"
       apps:
         argocd:
           name: argocd
