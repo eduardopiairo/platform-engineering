@@ -12,10 +12,10 @@ clusters:
         https:
           configs:
             url: https://github.com/eduardopiairo/platform-engineering.git
-            targetRevision: main
+            targetRevision: feature/kubara
           components:
             url: https://github.com/eduardopiairo/platform-engineering.git
-            targetRevision: main
+            targetRevision: feature/kubara
     services:
       argocd:
         status: enabled
