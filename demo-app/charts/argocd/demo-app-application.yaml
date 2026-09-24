@@ -1,0 +1,35 @@
+# Argo CD Application that deploys the demo-app Helm chart from this repo.
+#
+# Apply:
+#   kubectl apply -f demo-app/charts/argocd/demo-app-application.yaml
+#
+# Argo CD reads the chart from GitHub, so changes must be pushed to
+# targetRevision before they are deployed.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: demo-app
+  namespace: argocd
+  # Delete the app's Kubernetes resources when this Application is deleted
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/eduardopiairo/platform-engineering.git
+    targetRevision: feature/devops-platform-eng
+    path: demo-app/charts/demo-app
+    helm:
+      # Same release name as the existing Helm install, so resource names match
+      releaseName: demo-app
+      valueFiles:
+        - values.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: demo
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
