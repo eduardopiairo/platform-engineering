@@ -1,0 +1,7 @@
+# Only the Dockerfile, requirements.txt and src/ are needed to build the image
+charts/
+k8s/
+README.md
+**/__pycache__/
+**/*.pyc
+.env

@@ -10,17 +10,19 @@ on:
       - main
       - "feature/**"
     paths:
-      - demo-app/app.py
-      - demo-app/requirements.txt
+      - demo-app/src/**
       - demo-app/Dockerfile
+      - demo-app/.dockerignore
+      - demo-app/requirements.txt
       - .github/workflows/demo-app-build.yml
   pull_request:
     branches:
       - main
     paths:
-      - demo-app/app.py
-      - demo-app/requirements.txt
+      - demo-app/src/**
       - demo-app/Dockerfile
+      - demo-app/.dockerignore
+      - demo-app/requirements.txt
       - .github/workflows/demo-app-build.yml
   workflow_dispatch:
 
@@ -79,6 +81,10 @@ jobs:
         if: github.event_name != 'pull_request'
         run: |
           sed -i "s/^appVersion: .*/appVersion: \"${APP_VERSION}\"/" "$CHART"
+          if git diff --quiet "$CHART"; then
+            echo "appVersion is already ${APP_VERSION}; nothing to commit"
+            exit 0
+          fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add "$CHART"
