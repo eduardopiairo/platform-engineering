@@ -38,3 +38,4 @@ def info():
             "env": {k: v for k, v in os.environ.items() if k.startswith("APP_")},
         }
     )
+
