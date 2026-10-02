@@ -38,7 +38,7 @@ env:
 
 jobs:
   build:
-    runs-on: selh-hosted
+    runs-on: self-hosted
     permissions:
       # Needed to commit the new appVersion back to the branch
       contents: write
