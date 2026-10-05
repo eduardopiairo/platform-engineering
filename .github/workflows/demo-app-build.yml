@@ -95,8 +95,9 @@ jobs:
     runs-on: self-hosted
     env:
       ARGOCD_APP: demo-app
-      # The runner runs inside the cluster, so it reaches argocd-server directly
-      ARGOCD_SERVER: argocd-server.argocd.svc.cluster.local:80
+      # The runner is the laptop, which already has the argocd CLI and reaches
+      # argocd-server through: kubectl port-forward svc/argocd-server -n argocd 8080:80
+      ARGOCD_SERVER: localhost:8080
       ARGOCD_AUTH_TOKEN: ${{ secrets.ARGOCD_AUTH_TOKEN }}
       # argocd-server is served over plain HTTP (server.insecure in charts/argocd/values.yaml)
       ARGOCD_OPTS: --plaintext --grpc-web
