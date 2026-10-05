@@ -18,6 +18,15 @@ configs:
   params:
     # Serve the UI/API over plain HTTP; TLS is unnecessary behind a local port-forward
     server.insecure: true
+  cm:
+    # Local account used by the GitHub Actions cd job (API token only, no UI login)
+    accounts.ci: apiKey
+  rbac:
+    # The ci account may only view and sync the demo-app Application
+    policy.csv: |
+      p, role:ci, applications, get, default/demo-app, allow
+      p, role:ci, applications, sync, default/demo-app, allow
+      g, ci, role:ci
 
 # SSO is not needed locally; log in with the built-in admin user
 dex:
