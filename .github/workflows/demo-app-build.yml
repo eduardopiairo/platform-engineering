@@ -94,14 +94,35 @@ jobs:
     needs: ci
     runs-on: self-hosted
     env:
+      ARGOCD_VERSION: v3.5.3
       ARGOCD_APP: demo-app
-      # The runner is the laptop, which already has the argocd CLI and reaches
-      # argocd-server through: kubectl port-forward svc/argocd-server -n argocd 8080:80
-      ARGOCD_SERVER: localhost:8080
+      # The runner is an ARC pod inside the kind cluster, so it reaches argocd-server directly
+      ARGOCD_SERVER: argocd-server.argocd.svc.cluster.local:80
       ARGOCD_AUTH_TOKEN: ${{ secrets.ARGOCD_AUTH_TOKEN }}
       # argocd-server is served over plain HTTP (server.insecure in charts/argocd/values.yaml)
       ARGOCD_OPTS: --plaintext --grpc-web
     steps:
+      # The runner image doesn't ship the argocd CLI
+      - name: Install Argo CD CLI
+        run: |
+          case "$(uname -m)" in
+            x86_64) ARCH=amd64 ;;
+            aarch64|arm64) ARCH=arm64 ;;
+            *) echo "Unsupported architecture: $(uname -m)"; exit 1 ;;
+          esac
+          mkdir -p "$RUNNER_TEMP/bin"
+          curl -sSfL -o "$RUNNER_TEMP/bin/argocd" \
+            "https://github.com/argoproj/argo-cd/releases/download/${ARGOCD_VERSION}/argocd-linux-${ARCH}"
+          chmod +x "$RUNNER_TEMP/bin/argocd"
+          echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
+
+      - name: Check Argo CD token
+        run: |
+          if [ -z "$ARGOCD_AUTH_TOKEN" ]; then
+            echo "::error::ARGOCD_AUTH_TOKEN secret is not set (see demo-app/README.md)"
+            exit 1
+          fi
+
       # Syncs to the Application's targetRevision, which now includes the appVersion commit
       - name: Sync App
         run: |

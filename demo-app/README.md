@@ -106,9 +106,9 @@ kubectl apply -f demo-app/charts/argocd/demo-app-application.yaml
 
 After the `ci` job pushes the image and commits the new `appVersion`, the `cd`
 job in [demo-app-build.yml](../.github/workflows/demo-app-build.yml) runs on the
-self-hosted runner (this laptop) and calls `argocd app sync demo-app`, then waits until
-the app is synced and healthy. The laptop must have the `argocd` CLI installed and the
-`argocd-server` port-forward above running on `localhost:8080`.
+self-hosted runner (an ARC pod in the kind cluster, see
+[self-hosted-runner/README.md](self-hosted-runner/README.md)), installs the `argocd` CLI and
+calls `argocd app sync demo-app`, then waits until the app is synced and healthy.
 
 The job authenticates as the `ci` Argo CD account. Generate its token once and store it
 as the `ARGOCD_AUTH_TOKEN` repository secret (keep the port-forward above running):
