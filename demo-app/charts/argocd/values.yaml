@@ -13,6 +13,10 @@
 
 global:
   domain: localhost
+  # kindnet enforces NetworkPolicies, and with the chart's policies in place pods outside
+  # the argocd namespace (e.g. the self-hosted runner) time out reaching argocd-server
+  networkPolicy:
+    create: false
 
 configs:
   params:
