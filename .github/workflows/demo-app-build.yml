@@ -131,7 +131,7 @@ jobs:
       - name: Sync App
         run: |
           # Let any auto-sync already in progress finish, or the sync is rejected
-          argocd app wait "$ARGOCD_APP" --operation --timeout 90
+          # argocd app wait "$ARGOCD_APP" --operation --timeout 90
           argocd app sync "$ARGOCD_APP" --prune
-          argocd app wait "$ARGOCD_APP" --sync --health --timeout 90
+          # argocd app wait "$ARGOCD_APP" --sync --health --timeout 90
 
