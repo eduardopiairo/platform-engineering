@@ -97,11 +97,12 @@ jobs:
       ARGOCD_VERSION: v3.5.3
       ARGOCD_APP: demo-app
       # The runner is an ARC pod inside the kind cluster, so it reaches argocd-server directly
-      ARGOCD_SERVER: argocd-server.argocd.svc.cluster.local:80
+      ARGOCD_SERVER: argocd-server.argocd.svc.cluster.local:443
       ARGOCD_USERNAME: admin
       ARGOCD_PASSWORD: ${{ secrets.ARGOCD_PASSWORD }}
-      # argocd-server is served over plain HTTP (server.insecure in charts/argocd/values.yaml)
-      ARGOCD_OPTS: --plaintext --grpc-web
+      # argocd-server uses a self-signed certificate, so skip TLS verification.
+      # gRPC-web isn't needed: the runner talks to argocd-server directly, with no proxy in between
+      ARGOCD_OPTS: --insecure
     steps:
       # The runner image doesn't ship the argocd CLI
       - name: Install Argo CD CLI
@@ -117,7 +118,7 @@ jobs:
           chmod +x "$RUNNER_TEMP/bin/argocd"
           echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
 
-      # ARGOCD_OPTS supplies --plaintext --grpc-web; the session is saved to the
+      # ARGOCD_OPTS supplies --insecure; the session is saved to the
       # CLI config, so the following argocd commands reuse it
       - name: Log in to Argo CD
         run: |
