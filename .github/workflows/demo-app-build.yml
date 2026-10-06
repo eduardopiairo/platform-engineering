@@ -98,7 +98,8 @@ jobs:
       ARGOCD_APP: demo-app
       # The runner is an ARC pod inside the kind cluster, so it reaches argocd-server directly
       ARGOCD_SERVER: argocd-server.argocd.svc.cluster.local:80
-      ARGOCD_AUTH_TOKEN: ${{ secrets.ARGOCD_AUTH_TOKEN }}
+      ARGOCD_USERNAME: admin
+      ARGOCD_PASSWORD: ${{ secrets.ARGOCD_PASSWORD }}
       # argocd-server is served over plain HTTP (server.insecure in charts/argocd/values.yaml)
       ARGOCD_OPTS: --plaintext --grpc-web
     steps:
@@ -116,12 +117,15 @@ jobs:
           chmod +x "$RUNNER_TEMP/bin/argocd"
           echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
 
-      - name: Check Argo CD token
+      # ARGOCD_OPTS supplies --plaintext --grpc-web; the session is saved to the
+      # CLI config, so the following argocd commands reuse it
+      - name: Log in to Argo CD
         run: |
-          if [ -z "$ARGOCD_AUTH_TOKEN" ]; then
-            echo "::error::ARGOCD_AUTH_TOKEN secret is not set (see demo-app/README.md)"
+          if [ -z "$ARGOCD_PASSWORD" ]; then
+            echo "::error::ARGOCD_PASSWORD secret is not set (see demo-app/README.md)"
             exit 1
           fi
+          argocd login "$ARGOCD_SERVER" --username "$ARGOCD_USERNAME" --password "$ARGOCD_PASSWORD"
 
       # Syncs to the Application's targetRevision, which now includes the appVersion commit
       - name: Sync App

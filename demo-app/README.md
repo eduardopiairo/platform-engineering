@@ -110,14 +110,11 @@ self-hosted runner (an ARC pod in the kind cluster, see
 [self-hosted-runner/README.md](self-hosted-runner/README.md)), installs the `argocd` CLI and
 calls `argocd app sync demo-app`, then waits until the app is synced and healthy.
 
-The job authenticates as the `ci` Argo CD account. Generate its token once and store it
-as the `ARGOCD_AUTH_TOKEN` repository secret (keep the port-forward above running):
+The job logs in as the Argo CD `admin` user. Store the admin password once as the
+`ARGOCD_PASSWORD` repository secret:
 
 ```bash
-argocd login localhost:8080 --plaintext --username admin \
-  --password "$(kubectl -n argocd get secret argocd-initial-admin-secret \
-    -o jsonpath='{.data.password}' | base64 -d)"
-
-argocd account generate-token --account ci \
-  | gh secret set ARGOCD_AUTH_TOKEN --repo eduardopiairo/platform-engineering
+kubectl -n argocd get secret argocd-initial-admin-secret \
+  -o jsonpath='{.data.password}' | base64 -d \
+  | gh secret set ARGOCD_PASSWORD --repo eduardopiairo/platform-engineering
 ```
