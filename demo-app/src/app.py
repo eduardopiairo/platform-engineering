@@ -36,6 +36,7 @@ def info():
             "hostname": socket.gethostname(),
             "started_at": START_TIME.isoformat(),
             "env": {k: v for k, v in os.environ.items() if k.startswith("APP_")},
+            "messgae": "This is a demo app for testing purposes",
         }
     )
 
