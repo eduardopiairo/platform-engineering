@@ -5,7 +5,8 @@ metadata:
   description: My python app.
   # Example for optional annotations
   annotations:
-    github.com/project-slug: https://github.com/eduardopiairo/platform-engineering
+    github.com/project-slug: eduardopiairo/platform-engineering
+    backstage.io/techdocs-ref: dir:.
 spec:
   type: service
   owner: development
