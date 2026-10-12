@@ -1,0 +1,12 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: demo-app
+  description: My python app.
+  # Example for optional annotations
+  annotations:
+    github.com/project-slug: https://github.com/eduardopiairo/platform-engineering
+spec:
+  type: service
+  owner: development
+  lifecycle: experimental
