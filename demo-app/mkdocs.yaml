@@ -1,0 +1,11 @@
+site_name: demo-app
+site_description: A minimal FastAPI service used to demo the platform-engineering pipeline.
+repo_url: https://github.com/eduardopiairo/platform-engineering
+edit_uri: edit/feature/devops-platform-eng/demo-app/docs/
+
+
+plugins:
+  - techdocs-core
+
+nav:
+  - Home: index.md
